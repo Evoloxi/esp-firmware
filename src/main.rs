@@ -42,7 +42,6 @@ fn main() -> anyhow::Result<()> {
 
 	let peripherals = Peripherals::take()?;
 	let sys_loop = EspSystemEventLoop::take()?;
-	let counter = Arc::new(AtomicU32::new(0));
 	let nvs = EspDefaultNvsPartition::take()?;
 
 	let wifi_driver = WifiDriver::new(peripherals.modem, sys_loop.clone(), Some(nvs))?;
