@@ -1,0 +1,52 @@
+[package]
+name = "esp-firmware"
+version = "0.1.0"
+authors = ["uwu"]
+edition = "2021"
+resolver = "2"
+rust-version = "1.77"
+
+[[bin]]
+name = "esp-firmware"
+harness = false # do not use the built in cargo test harness -> resolve rust-analyzer errors
+
+[profile.release]
+opt-level = "s"
+
+[profile.dev]
+debug = true    # Symbols are nice and they don't increase the size on Flash
+opt-level = "z"
+
+[features]
+default = ["std", "embassy", "esp-idf-svc/native"]
+
+pio = ["esp-idf-svc/pio"]
+std = ["alloc", "esp-idf-svc/binstart", "esp-idf-svc/std"]
+alloc = ["esp-idf-svc/alloc"]
+nightly = ["esp-idf-svc/nightly"]
+experimental = ["esp-idf-svc/experimental"]
+embassy = ["esp-idf-svc/embassy-sync", "esp-idf-svc/critical-section", "esp-idf-svc/embassy-time-driver"]
+
+[dependencies]
+log = { version = "0.4", default-features = false }
+esp-idf-svc = { version = "0.49.1", default-features = false }
+esp-idf-hal = { version = "0.44.1", features = ["rmt-legacy"]}
+embedded-svc = "0.28.0"
+futures = "0.3.31"
+anyhow = "1.0.91"
+http = "1.1.0"
+serde = { version = "1.0.213", features = ["derive"] }
+serde_json = "1.0.132"
+smart-leds = "0.4.0"
+crossbeam-channel = "0.5.13"
+crossbeam-utils = "0.8.20"
+lazy_static = "1.5.0"
+tokio = { version = "1.41.0", features = ["rt", "rt-multi-thread", "macros", "time"] }
+
+
+[patch.crates-io]
+esp-idf-svc = { git = "https://github.com/Evoloxi/esp-idf-svc.git" }
+esp-idf-hal = { git = "https://github.com/Evoloxi/esp-idf-hal.git"}
+
+[build-dependencies]
+embuild = "0.32.0"
