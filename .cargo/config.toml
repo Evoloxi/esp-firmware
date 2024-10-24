@@ -16,7 +16,5 @@ ESP_IDF_VERSION = "master"
 
 # Workaround for https://github.com/esp-rs/esp-idf-template/issues/174 
 # CRATE_CC_NO_DEFAULTS = "1"
-WIFI_SSID = "TP"
-WIFI_PASS = "123456789"
 ESP_DEVICE_IP = "192.168.0.10"
 GATEWAY_IP = "192.168.0.1"

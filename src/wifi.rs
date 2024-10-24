@@ -2,7 +2,7 @@ use std::net::Ipv4Addr;
 use std::str::FromStr;
 use esp_idf_svc::netif::{EspNetif, NetifConfiguration, NetifStack};
 use esp_idf_svc::wifi::{BlockingWifi, EspWifi, WifiDriver};
-use log::info;
+use esp_idf_svc::nvs::*;
 
 use esp_idf_svc::ipv4::{
 	ClientConfiguration as IpClientConfiguration, ClientSettings as IpClientSettings,
@@ -10,10 +10,9 @@ use esp_idf_svc::ipv4::{
 };
 
 use embedded_svc::wifi::{AuthMethod, ClientConfiguration, Configuration as WifiConfiguration};
+use crate::{info, DEVICE_IP, GATEWAY_IP, GATEWAY_NETMASK};
 
-use crate::{DEVICE_IP, GATEWAY_IP, GATEWAY_NETMASK, PASSWORD, SSID};
-
-pub fn configure_wifi(wifi: WifiDriver) -> anyhow::Result<EspWifi> {
+pub fn configure_wifi(wifi: WifiDriver, partition: EspNvsPartition<NvsDefault>) -> anyhow::Result<EspWifi> {
 	let netmask = GATEWAY_NETMASK.unwrap_or("24");
 	let netmask = u8::from_str(netmask)?;
 	let gateway_addr = Ipv4Addr::from_str(GATEWAY_IP)?;
@@ -38,12 +37,19 @@ pub fn configure_wifi(wifi: WifiDriver) -> anyhow::Result<EspWifi> {
 		})?,
 		EspNetif::new(NetifStack::Ap)?,
 	)?;
+	let nvs = EspNvs::new(partition, "credentials", true)?;
+
+	let mut ssid_buf = [0u8; 64];
+	let mut pass_buf = [0u8; 64];
+
+	let ssid = nvs.get_str("wifi_ssid", &mut ssid_buf).expect("wifi_ssid not set!").unwrap();
+	let pass = nvs.get_str("wifi_pass", &mut pass_buf).expect("wifi_pass not set!").unwrap();
 
 	let wifi_configuration = WifiConfiguration::Client(ClientConfiguration {
-		ssid: SSID.try_into().unwrap(),
+		ssid: ssid.parse().unwrap(),
 		bssid: None,
 		auth_method: AuthMethod::WPA2Personal,
-		password: PASSWORD.try_into().unwrap(),
+		password: pass.parse().unwrap(),
 		channel: None,
 		..Default::default()
 	});
