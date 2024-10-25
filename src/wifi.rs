@@ -37,20 +37,20 @@ pub fn configure_wifi(wifi: WifiDriver, partition: EspNvsPartition<NvsDefault>) 
 		})?,
 		EspNetif::new(NetifStack::Ap)?,
 	)?;
-	let nvs = EspNvs::new(partition, "credentials", true)?;
+	let nvs = EspNvs::new(partition, "credentials", false)?;
 
 	let mut ssid_buf = [0u8; 64];
 	let mut pass_buf = [0u8; 64];
 
 	let ssid = nvs.get_str("wifi_ssid", &mut ssid_buf).expect("wifi_ssid not set!").unwrap();
 	let pass = nvs.get_str("wifi_pass", &mut pass_buf).expect("wifi_pass not set!").unwrap();
-
+	
 	let wifi_configuration = WifiConfiguration::Client(ClientConfiguration {
 		ssid: ssid.parse().unwrap(),
 		bssid: None,
 		auth_method: AuthMethod::WPA2Personal,
 		password: pass.parse().unwrap(),
-		channel: None,
+		channel: Some(1),
 		..Default::default()
 	});
 	wifi.set_configuration(&wifi_configuration)?;
@@ -61,7 +61,7 @@ pub fn configure_wifi(wifi: WifiDriver, partition: EspNvsPartition<NvsDefault>) 
 pub fn connect_wifi(wifi: &mut BlockingWifi<EspWifi<'static>>) -> anyhow::Result<()> {
 	wifi.start()?;
 	info!("Wifi started\n");
-
+	
 	wifi.connect()?;
 	info!("Wifi connected\n");
 

@@ -3,7 +3,7 @@ target = "xtensa-esp32s3-espidf"
 
 [target.xtensa-esp32s3-espidf]
 linker = "ldproxy"
-runner = "espflash flash --monitor -f 80mhz -B 921600 -T partitions.csv" # Select this runner for espflash v3.x.x
+runner = "espflash flash --monitor -f 40mhz -B 921600 -T partitions.csv" # Select this runner for espflash v3.x.x
 rustflags = [ "--cfg",  "espidf_time64"] # Extending time_t for ESP IDF 5: https://github.com/esp-rs/rust/issues/110
 
 [unstable]
@@ -18,3 +18,4 @@ ESP_IDF_VERSION = "master"
 # CRATE_CC_NO_DEFAULTS = "1"
 ESP_DEVICE_IP = "192.168.0.10"
 GATEWAY_IP = "192.168.0.1"
+WIFI_HIGH_PWR_DURATION = "60"
