@@ -32,7 +32,6 @@ pub fn configure_wifi(wifi: WifiDriver, partition: EspNvsPartition<NvsDefault>) 
 					secondary_dns: None,
 				},
 			))),
-			custom_mac: Option::from([0x88u8, 0x88u8, 0x88u8, 0x88u8, 0x88u8, 0x88u8]),
 			..NetifConfiguration::wifi_default_client()
 		})?,
 		EspNetif::new(NetifStack::Ap)?,
