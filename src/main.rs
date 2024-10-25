@@ -38,26 +38,18 @@ fn main() -> anyhow::Result<()> {
 	let temp_prev = Arc::new(AtomicU32::new(0));
 	let timer_service = EspTaskTimerService::new()?;
 	let timer = {
-		let sys_loop = sys_loop.clone();
-		let temp_prev = temp_prev.clone();
 
 		timer_service.timer(move || {
 			let current = temp.lock().unwrap().get_celsius().unwrap();
 			if (temp_prev.load(Ordering::Relaxed) as f32 - current).abs() > 1f32 {
 				temp_prev.store(current as u32, Ordering::Relaxed);
-				sys_loop
-					.post::<TemperatureChangeEvent>(&TemperatureChangeEvent::new(current), delay::BLOCK, )
-					.unwrap();
+				info!("Temp: {:?}°C", current.ceil());
 			}
 		})?
 	};
 
 	timer.every(Duration::from_secs(1))?;
-
-	let subscription = sys_loop.subscribe::<TemperatureChangeEvent, _>(move |e| {
-		info!("Temp: {:?}°C", e.value.ceil());
-	})?;
-
+	
 	let before = SystemTime::now();
 	
 	let mut wifi = BlockingWifi::wrap(configure_wifi(wifi_driver, partition)?, sys_loop.clone())?;
@@ -70,7 +62,6 @@ fn main() -> anyhow::Result<()> {
 
 	std::mem::forget(wifi);
 	std::mem::forget(timer);
-	std::mem::forget(subscription);
 
 	Ok(())
 }
