@@ -8,3 +8,10 @@ macro_rules! info {
         ::log::log!(::log::Level::Info, "{}\n", format!($($arg)+))
     )
 }
+
+#[macro_export]
+macro_rules! arc_mutex {
+    ($e:expr) => {
+        Arc::new(Mutex::new($e))
+    };
+}

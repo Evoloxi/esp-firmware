@@ -15,6 +15,7 @@ use esp_idf_svc::{eventloop::EspSystemEventLoop, nvs::EspDefaultNvsPartition};
 use esp_idf_svc::timer::EspTaskTimerService;
 use crate::server::initialize_server;
 use crate::wifi::{configure_wifi, connect_wifi};
+
 const DEVICE_IP: &str = env!("ESP_DEVICE_IP");
 const GATEWAY_IP: &str = env!("GATEWAY_IP");
 const GATEWAY_NETMASK: Option<&str> = option_env!("GATEWAY_NETMASK");
@@ -30,13 +31,14 @@ fn main() -> anyhow::Result<()> {
 
 	let wifi_driver = WifiDriver::new(peripherals.modem, sys_loop.clone(), Some(partition.clone()))?;
 	let cfg = TempSensorConfig::default();
-	let temp = Arc::new(Mutex::new(TempSensorDriver::new(&cfg, peripherals.temp_sensor)?));
+	let temp = arc_mutex!(TempSensorDriver::new(&cfg, peripherals.temp_sensor)?);
+	
 	temp.lock().unwrap().enable()?;
+	
 
 	let temp_prev = Arc::new(AtomicU32::new(0));
 	let timer_service = EspTaskTimerService::new()?;
 	let timer = {
-
 		timer_service.timer(move || {
 			let current = temp.lock().unwrap().get_celsius().unwrap();
 			if (temp_prev.load(Ordering::Relaxed) as f32 - current).abs() > 1f32 {
@@ -47,9 +49,9 @@ fn main() -> anyhow::Result<()> {
 	};
 
 	timer.every(Duration::from_secs(1))?;
-	
+
 	let before = SystemTime::now();
-	
+
 	let mut wifi = BlockingWifi::wrap(configure_wifi(wifi_driver, partition)?, sys_loop.clone())?;
 
 	connect_wifi(&mut wifi)?;
