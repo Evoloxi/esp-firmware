@@ -1,4 +1,4 @@
-use crate::{arc_mutex, info};
+use crate::{arc, info};
 use embedded_svc::http::Method;
 use embedded_svc::io::Write;
 use esp_idf_svc::sys::{esp, esp_wifi_get_ps, esp_wifi_set_ps, wifi_ps_type_t, wifi_ps_type_t_WIFI_PS_MAX_MODEM, wifi_ps_type_t_WIFI_PS_NONE};
@@ -27,7 +27,7 @@ pub fn initialize_server(
 	let mut server = create_server()?;
 
 	let timer_service = EspTaskTimerService::new()?;
-	let reset_timer = arc_mutex!(timer_service.timer(move || {
+	let reset_timer = arc!(timer_service.timer(move || {
 		esp!(unsafe { esp_wifi_set_ps(wifi_ps_type_t_WIFI_PS_MAX_MODEM) }).unwrap();
 	})?);
 

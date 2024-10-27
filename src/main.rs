@@ -31,13 +31,15 @@ fn main() -> anyhow::Result<()> {
 
 	let wifi_driver = WifiDriver::new(peripherals.modem, sys_loop.clone(), Some(partition.clone()))?;
 	let cfg = TempSensorConfig::default();
-	let temp = arc_mutex!(TempSensorDriver::new(&cfg, peripherals.temp_sensor)?);
+	let temp = arc!(TempSensorDriver::new(&cfg, peripherals.temp_sensor)?);
 	
 	temp.lock().unwrap().enable()?;
 	
-
+	
+	
 	let temp_prev = Arc::new(AtomicU32::new(0));
 	let timer_service = EspTaskTimerService::new()?;
+	
 	let timer = {
 		timer_service.timer(move || {
 			let current = temp.lock().unwrap().get_celsius().unwrap();

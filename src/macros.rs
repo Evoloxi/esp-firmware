@@ -10,7 +10,7 @@ macro_rules! info {
 }
 
 #[macro_export]
-macro_rules! arc_mutex {
+macro_rules! arc {
     ($e:expr) => {
         Arc::new(Mutex::new($e))
     };
